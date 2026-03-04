@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Management</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f14;
+    --surface: #13161e;
+    --card: #1a1e28;
+    --border: #252a38;
+    --accent: #4f8fff;
+    --accent2: #a78bfa;
+    --danger: #f87171;
+    --success: #34d399;
+    --warn: #fbbf24;
+    --text: #e8eaf0;
+    --muted: #6b7280;
+    --radius: 14px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 10% -10%, rgba(79,143,255,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 90% 100%, rgba(167,139,250,0.06) 0%, transparent 60%);
+  }
+
+  /* ---- HEADER ---- */
+  header {
+    padding: 28px 32px 0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .logo-ring {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+    box-shadow: 0 0 20px rgba(79,143,255,0.3);
+  }
+  header h1 {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: clamp(20px, 3vw, 26px);
+    letter-spacing: -0.5px;
+  }
+  header h1 span { color: var(--accent); }
+  .header-badge {
+    margin-left: auto;
+    background: rgba(79,143,255,0.12);
+    border: 1px solid rgba(79,143,255,0.25);
+    color: var(--accent);
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 12px;
+    border-radius: 999px;
+  }
+
+  /* ---- LAYOUT ---- */
+  main {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 28px 24px 60px;
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 24px;
+    align-items: start;
+  }
+  @media (max-width: 860px) {
+    main { grid-template-columns: 1fr; }
+    header { padding: 20px 16px 0; }
+    main { padding: 20px 16px 60px; }
+  }
+
+  /* ---- CARD ---- */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    position: relative;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+  .card-header {
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .card-header-icon {
+    width: 32px; height: 32px;
+    background: rgba(79,143,255,0.12);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.2px;
+  }
+  .card-body { padding: 20px 24px 24px; }
+
+  /* ---- FORM ---- */
+  .form-group { margin-bottom: 16px; }
+  label.field-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 7px;
+  }
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"] {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(79,143,255,0.12);
+  }
+  input::placeholder { color: var(--muted); font-size: 13px; }
+
+  /* Radio group */
+  .radio-group {
+    display: flex; gap: 8px; flex-wrap: wrap;
+  }
+  .radio-label {
+    display: flex; align-items: center; gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: border-color 0.2s, background 0.2s;
+    flex: 1; min-width: 80px;
+    justify-content: center;
+  }
+  .radio-label input[type="radio"] { display: none; }
+  .radio-label:has(input:checked) {
+    border-color: var(--accent);
+    background: rgba(79,143,255,0.1);
+    color: var(--accent);
+  }
+  .radio-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+    transition: background 0.2s;
+  }
+  .radio-label:has(input:checked) .radio-dot { background: var(--accent); }
+
+  /* Checkbox */
+  .checkbox-label {
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer; font-size: 13px; color: var(--muted);
+    user-select: none;
+  }
+  .checkbox-label input[type="checkbox"] { display: none; }
+  .custom-cb {
+    width: 18px; height: 18px;
+    border: 1.5px solid var(--border);
+    border-radius: 5px;
+    background: var(--surface);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; flex-shrink: 0;
+  }
+  .checkbox-label:has(input:checked) .custom-cb {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+  .custom-cb::after {
+    content: '✓';
+    font-size: 11px;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .checkbox-label:has(input:checked) .custom-cb::after { opacity: 1; }
+
+  /* Buttons */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    gap: 7px; padding: 10px 18px;
+    border: none; border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px; font-weight: 500;
+    cursor: pointer; transition: all 0.18s;
+    white-space: nowrap;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent), #6ba3ff);
+    color: white;
+    box-shadow: 0 4px 16px rgba(79,143,255,0.3);
+    width: 100%; padding: 12px;
+    font-size: 15px; font-weight: 600;
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(79,143,255,0.4); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-edit {
+    background: rgba(167,139,250,0.12);
+    color: var(--accent2);
+    border: 1px solid rgba(167,139,250,0.2);
+    padding: 6px 12px; font-size: 12px; border-radius: 8px;
+  }
+  .btn-edit:hover { background: rgba(167,139,250,0.22); }
+  .btn-delete {
+    background: rgba(248,113,113,0.1);
+    color: var(--danger);
+    border: 1px solid rgba(248,113,113,0.2);
+    padding: 6px 12px; font-size: 12px; border-radius: 8px;
+  }
+  .btn-delete:hover { background: rgba(248,113,113,0.2); }
+
+  /* Edit mode indicator */
+  .edit-banner {
+    display: none;
+    background: rgba(251,191,36,0.1);
+    border: 1px solid rgba(251,191,36,0.25);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    font-size: 13px;
+    color: var(--warn);
+    align-items: center; gap: 8px;
+  }
+  .edit-banner.visible { display: flex; }
+
+  /* ---- TABLE SECTION ---- */
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .stats-row {
+    display: flex; gap: 12px; padding: 20px 24px 0; flex-wrap: wrap;
+  }
+  .stat-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 6px 14px;
+    font-size: 12px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .stat-num { font-weight: 700; font-size: 14px; color: var(--accent); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    min-width: 600px;
+  }
+  thead tr {
+    background: var(--surface);
+  }
+  thead th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    color: var(--muted);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  tbody tr {
+    border-bottom: 1px solid rgba(37,42,56,0.6);
+    transition: background 0.15s;
+  }
+  tbody tr:hover { background: rgba(79,143,255,0.04); }
+  tbody tr:last-child { border-bottom: none; }
+  td {
+    padding: 13px 16px;
+    vertical-align: middle;
+  }
+  .sl-num {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    color: var(--muted);
+    font-size: 12px;
+  }
+  .user-name {
+    font-weight: 500;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .avatar {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700; color: white; flex-shrink: 0;
+  }
+  .email-text { color: var(--muted); font-size: 12px; }
+  .pass-dot {
+    letter-spacing: 2px; color: var(--muted); font-size: 16px;
+    user-select: none;
+  }
+  .gender-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: rgba(79,143,255,0.1);
+    border: 1px solid rgba(79,143,255,0.18);
+    color: var(--accent);
+    padding: 3px 10px; border-radius: 999px;
+    font-size: 11px; font-weight: 500;
+  }
+  .gender-badge.female {
+    background: rgba(167,139,250,0.1);
+    border-color: rgba(167,139,250,0.2);
+    color: var(--accent2);
+  }
+  .gender-badge.transgender {
+    background: rgba(52,211,153,0.1);
+    border-color: rgba(52,211,153,0.2);
+    color: var(--success);
+  }
+  .tc-checked {
+    display: inline-flex; align-items: center; gap: 5px;
+    color: var(--success); font-size: 12px;
+  }
+  .tc-unchecked { color: var(--danger); font-size: 12px; }
+  .actions-cell { display: flex; gap: 8px; }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center; padding: 52px 24px;
+    color: var(--muted);
+  }
+  .empty-state .empty-icon { font-size: 40px; margin-bottom: 12px; opacity: 0.5; }
+  .empty-state p { font-size: 14px; }
+
+  /* Toast */
+  #toast {
+    position: fixed; bottom: 28px; right: 28px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 20px;
+    font-size: 13px;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    transform: translateY(80px); opacity: 0;
+    transition: all 0.3s cubic-bezier(.34,1.56,.64,1);
+    z-index: 999; pointer-events: none;
+    max-width: 280px;
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+  #toast .toast-icon { font-size: 16px; }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  /* Modal confirm */
+  .modal-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+    z-index: 100; align-items: center; justify-content: center; padding: 16px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 28px 24px;
+    max-width: 360px; width: 100%;
+    animation: pop .25s cubic-bezier(.34,1.4,.64,1);
+  }
+  @keyframes pop { from { transform: scale(0.92); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .modal h3 { font-family: 'Syne', sans-serif; font-weight: 700; margin-bottom: 8px; }
+  .modal p { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: flex-end; }
+  .btn-ghost {
+    background: var(--surface); color: var(--text);
+    border: 1px solid var(--border);
+    padding: 9px 18px; border-radius: 9px; font-size: 14px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.15s;
+  }
+  .btn-ghost:hover { background: var(--border); }
+  .btn-danger-solid {
+    background: var(--danger); color: white;
+    border: none; padding: 9px 18px; border-radius: 9px; font-size: 14px; cursor: pointer;
+    font-family: 'DM Sans', sans-serif; font-weight: 500;
+    transition: opacity 0.15s;
+  }
+  .btn-danger-solid:hover { opacity: 0.85; }
+
+  @media (max-width: 500px) {
+    .card-body { padding: 16px; }
+    #toast { right: 16px; bottom: 16px; left: 16px; max-width: unset; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-ring">👤</div>
+  <h1>User <span>Management</span></h1>
+  <span class="header-badge" id="userCount">0 Users</span>
+</header>
+
+<main>
+  <!-- FORM CARD -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon">✏️</div>
+      <span class="card-title" id="formTitle">Add New User</span>
+    </div>
+    <div class="card-body">
+      <div class="edit-banner" id="editBanner">
+        ⚠️ <span>Editing existing record</span>
+      </div>
+
+      <form id="frm" novalidate>
+        <div class="form-group">
+          <label class="field-label">Full Name</label>
+          <input type="text" id="i1" placeholder="e.g. Arjun Das" required>
+        </div>
+        <div class="form-group">
+          <label class="field-label">Email Address</label>
+          <input type="email" id="i2" placeholder="e.g. arjun@example.com" required>
+        </div>
+        <div class="form-group">
+          <label class="field-label">Password</label>
+          <input type="password" id="i3" placeholder="Enter password" required>
+        </div>
+        <div class="form-group">
+          <label class="field-label">Age</label>
+          <input type="number" id="i4" placeholder="e.g. 25" min="1" max="120">
+        </div>
+        <div class="form-group">
+          <label class="field-label">Gender</label>
+          <div class="radio-group">
+            <label class="radio-label">
+              <input type="radio" name="gender" value="Male">
+              <span class="radio-dot"></span> Male
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="gender" value="Female">
+              <span class="radio-dot"></span> Female
+            </label>
+            <label class="radio-label">
+              <input type="radio" name="gender" value="Transgender">
+              <span class="radio-dot"></span> Other
+            </label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="i6">
+            <span class="custom-cb"></span>
+            I agree to the Terms &amp; Conditions
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary" id="submitBtn">
+          <span>💾</span> Save User
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- TABLE CARD -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-header-icon">📋</div>
+      <span class="card-title">All Users</span>
+    </div>
+    <div class="stats-row" id="statsRow"></div>
+    <div class="card-body" style="padding: 0;">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Password</th>
+              <th>Age</th>
+              <th>Gender</th>
+              <th>T&amp;C</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+        <div id="emptyState" class="empty-state" style="display:none;">
+          <div class="empty-icon">🫙</div>
+          <p>No users yet. Add one using the form!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Delete Confirm Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3>Delete User?</h3>
+    <p>This action cannot be undone. The user record will be permanently removed.</p>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn-danger-solid" onclick="confirmDelete()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"><span class="toast-icon" id="toastIcon"></span><span id="toastMsg"></span></div>
+
+<script>
+  let tbody = document.getElementById("tbody");
+  let frm = document.getElementById("frm");
+  let editIndex = null;
+  let pendingDeleteIndex = null;
+
+  let data = [
+    { name: "Raj Sharma", email: "raj@gmail.com", password: "E0123", age: 20, gender: "Male", tc: "Checked" },
+    { name: "Kasturi Sen", email: "kas@gmail.com", password: "E0124", age: 21, gender: "Female", tc: "Unchecked" },
+    { name: "Sayantani Dey", email: "sayantani@gmail.com", password: "E0125", age: 22, gender: "Female", tc: "Checked" }
+  ];
+
+  function getInitials(name) {
+    return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+  }
+
+  function readData() {
+    tbody.innerHTML = "";
+    const empty = document.getElementById("emptyState");
+    document.getElementById("userCount").textContent = data.length + " User" + (data.length !== 1 ? "s" : "");
+
+    // Stats
+    const males = data.filter(d => d.gender === "Male").length;
+    const females = data.filter(d => d.gender === "Female").length;
+    const agreed = data.filter(d => d.tc === "Checked").length;
+    document.getElementById("statsRow").innerHTML = `
+      <div class="stat-chip"><span class="stat-num">${data.length}</span> Total</div>
+      <div class="stat-chip"><span class="stat-num">${males}</span> Male</div>
+      <div class="stat-chip"><span class="stat-num">${females}</span> Female</div>
+      <div class="stat-chip"><span class="stat-num">${agreed}</span> Agreed T&C</div>
+    `;
+
+    if (data.length === 0) {
+      empty.style.display = "block";
+      return;
+    }
+    empty.style.display = "none";
+
+    data.forEach((e, i) => {
+      let tr = document.createElement("tr");
+      const gClass = e.gender === "Female" ? "female" : e.gender === "Transgender" ? "transgender" : "";
+      tr.innerHTML = `
+        <td><span class="sl-num">${String(i+1).padStart(2,'0')}</span></td>
+        <td>
+          <div class="user-name">
+            <div class="avatar">${getInitials(e.name)}</div>
+            ${e.name}
+          </div>
+        </td>
+        <td><span class="email-text">${e.email}</span></td>
+        <td><span class="pass-dot">••••••</span></td>
+        <td>${e.age || '—'}</td>
+        <td><span class="gender-badge ${gClass}">${e.gender}</span></td>
+        <td>
+          ${e.tc === "Checked"
+            ? '<span class="tc-checked">✅ Agreed</span>'
+            : '<span class="tc-unchecked">❌ Declined</span>'}
+        </td>
+        <td>
+          <div class="actions-cell">
+            <button class="btn btn-edit" onclick="editData(${i})">✏️ Edit</button>
+            <button class="btn btn-delete" onclick="openDeleteModal(${i})">🗑️ Del</button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  frm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const name = document.getElementById("i1").value.trim();
+    const email = document.getElementById("i2").value.trim();
+    const password = document.getElementById("i3").value;
+    const age = document.getElementById("i4").value;
+    const genderEl = document.querySelector("input[name='gender']:checked");
+    const tc = document.getElementById("i6").checked ? "Checked" : "Unchecked";
+
+    if (!name || !email || !password) { showToast("⚠️", "Please fill all required fields."); return; }
+    if (!genderEl) { showToast("⚠️", "Please select a gender."); return; }
+
+    const newObj = { name, email, password, age, gender: genderEl.value, tc };
+
+    if (editIndex === null) {
+      data.push(newObj);
+      showToast("✅", "User added successfully!");
+    } else {
+      data[editIndex] = newObj;
+      editIndex = null;
+      document.getElementById("i3").type = "password";
+      document.getElementById("editBanner").classList.remove("visible");
+      document.getElementById("formTitle").textContent = "Add New User";
+      document.getElementById("submitBtn").innerHTML = '<span>💾</span> Save User';
+      showToast("✏️", "User updated successfully!");
+    }
+    readData();
+    frm.reset();
+  });
+
+  function openDeleteModal(i) {
+    pendingDeleteIndex = i;
+    document.getElementById("modalOverlay").classList.add("open");
+  }
+  function closeModal() {
+    pendingDeleteIndex = null;
+    document.getElementById("modalOverlay").classList.remove("open");
+  }
+  function confirmDelete() {
+    if (pendingDeleteIndex !== null) {
+      data.splice(pendingDeleteIndex, 1);
+      readData();
+      showToast("🗑️", "User deleted.");
+      if (editIndex === pendingDeleteIndex) {
+        editIndex = null;
+        frm.reset();
+        document.getElementById("editBanner").classList.remove("visible");
+        document.getElementById("formTitle").textContent = "Add New User";
+        document.getElementById("submitBtn").innerHTML = '<span>💾</span> Save User';
+      }
+    }
+    closeModal();
+  }
+
+  function editData(i) {
+    document.getElementById("i1").value = data[i].name;
+    document.getElementById("i2").value = data[i].email;
+    document.getElementById("i3").value = data[i].password;
+    document.getElementById("i3").type = "text";
+    document.getElementById("i4").value = data[i].age;
+    const genderInput = document.querySelector(`input[name="gender"][value="${data[i].gender}"]`);
+    if (genderInput) genderInput.checked = true;
+    document.getElementById("i6").checked = data[i].tc === "Checked";
+    editIndex = i;
+    document.getElementById("editBanner").classList.add("visible");
+    document.getElementById("formTitle").textContent = "Edit User";
+    document.getElementById("submitBtn").innerHTML = '<span>💾</span> Update User';
+    // Scroll to form on mobile
+    document.querySelector('.card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  let toastTimer;
+  function showToast(icon, msg) {
+    const t = document.getElementById("toast");
+    document.getElementById("toastIcon").textContent = icon;
+    document.getElementById("toastMsg").textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove("show"), 2800);
+  }
+
+  // Close modal on backdrop click
+  document.getElementById("modalOverlay").addEventListener("click", (e) => {
+    if (e.target === e.currentTarget) closeModal();
+  });
+
+  readData();
+</script>
+</body>
+</html>
